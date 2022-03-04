@@ -85,7 +85,7 @@ bool ChrootToSafeEmptyDir() {
   alignas(16) std::array<char, PTHREAD_STACK_MIN_CONST> stack_buf;
 
 #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
-    defined(ARCH_CPU_MIPS_FAMILY)
+    defined(ARCH_CPU_MIPS_FAMILY) || defined(ARCH_CPU_RISCV_FAMILY)
   // SAFETY: This is the `stack` argument of `clone(2)`. Because the stack grows
   // downward on these architectures, this is the topmost address of the memory
   // space for the stack, and the address will not be dereferenced.

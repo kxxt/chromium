@@ -4,6 +4,7 @@
 
 #include "sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.h"
 
+#include <asm/ptrace.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/elf.h>

@@ -45,7 +45,7 @@
 #endif
 
 #if BUILDFLAG(IS_LINUX) && !defined(__arm__) && !defined(__aarch64__) && \
-    !defined(PTRACE_GET_THREAD_AREA)
+    !defined(__riscv) && !defined(PTRACE_GET_THREAD_AREA)
 // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
 // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
 // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
@@ -488,16 +488,19 @@ ResultExpr RestrictPtrace() {
   const Arg<uintptr_t> addr(2);
 #endif
   return Switch(request)
-      .Cases({
+      .Cases(
+          {
+#if !defined(__aarch64__) && !defined(__riscv)
+              PTRACE_GETREGS, PTRACE_GETFPREGS, PTRACE_GET_THREAD_AREA,
+#endif
 #if !defined(__aarch64__)
-                 PTRACE_GETREGS, PTRACE_GETFPREGS, PTRACE_GET_THREAD_AREA,
-                 PTRACE_GETREGSET,
+              PTRACE_GETREGSET,
 #endif
 #if defined(__arm__)
-                 PTRACE_GETVFPREGS,
+              PTRACE_GETVFPREGS,
 #endif
-                 PTRACE_PEEKDATA, PTRACE_ATTACH, PTRACE_DETACH},
-             Allow())
+              PTRACE_PEEKDATA, PTRACE_ATTACH, PTRACE_DETACH},
+          Allow())
 #if defined(__aarch64__)
       .Case(
           PTRACE_GETREGSET,
@@ -535,7 +538,7 @@ SANDBOX_EXPORT bpf_dsl::ResultExpr RestrictSockSendFlags(int sysno) {
       break;
 #endif
 #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
-    defined(__mips__) || defined(__aarch64__)
+    defined(__mips__) || defined(__aarch64__) || defined(__riscv)
     case __NR_sendto:  // Could specify destination.
       argIndex = 3;
       break;
