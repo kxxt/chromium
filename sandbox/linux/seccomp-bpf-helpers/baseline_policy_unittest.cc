@@ -275,7 +275,7 @@ BPF_TEST_C(BaselinePolicy, GetRandom, BaselinePolicy) {
 }
 
 // Not all architectures can restrict the domain for socketpair().
-#if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__)
+#if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv)
 BPF_DEATH_TEST_C(BaselinePolicy,
                  SocketpairWrongDomain,
                  DEATH_SEGV_MESSAGE(GetErrorMessageContentForTests()),
@@ -284,7 +284,7 @@ BPF_DEATH_TEST_C(BaselinePolicy,
   std::ignore = socketpair(AF_INET, SOCK_STREAM, 0, sv);
   _exit(1);
 }
-#endif  // defined(__x86_64__) || defined(__arm__) || defined(__aarch64__)
+#endif  // defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv)
 
 BPF_TEST_C(BaselinePolicy, EPERM_open, BaselinePolicy) {
   errno = 0;
@@ -348,7 +348,7 @@ TEST_BASELINE_SIGSYS(__NR_sysinfo)
 TEST_BASELINE_SIGSYS(__NR_syslog)
 TEST_BASELINE_SIGSYS(__NR_timer_create)
 
-#if !defined(__aarch64__)
+#if !defined(__aarch64__) && !defined(__riscv)
 TEST_BASELINE_SIGSYS(__NR_inotify_init)
 TEST_BASELINE_SIGSYS(__NR_vserver)
 #endif

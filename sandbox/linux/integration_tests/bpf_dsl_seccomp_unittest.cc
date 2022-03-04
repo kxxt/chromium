@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+#include <linux/elf.h>
 
 #include <array>
 #include <memory>
@@ -2033,7 +2034,15 @@ SANDBOX_TEST(SandboxBPF, DISABLE_ON_TSAN(SeccompRetTrace)) {
     BPF_ASSERT_EQ(kTraceData, data);
 
     regs_struct regs;
+#if defined(__riscv)
+    iovec iov;
+    iov.iov_base = &regs;
+    iov.iov_len = sizeof(regs);
+    BPF_ASSERT_NE(-1, ptrace(PTRACE_GETREGSET, pid,
+                             reinterpret_case<void*>(NT_PRSTATUS), &iov));
+#else
     BPF_ASSERT_NE(-1, ptrace(PTRACE_GETREGS, pid, NULL, &regs));
+#endif
     switch (SECCOMP_PT_SYSCALL(regs)) {
       case __NR_write:
         // Skip writes to stdout, make it return kExpectedReturnValue.  Allow
@@ -2041,7 +2050,14 @@ SANDBOX_TEST(SandboxBPF, DISABLE_ON_TSAN(SeccompRetTrace)) {
         if (SECCOMP_PT_PARM1(regs) == STDOUT_FILENO) {
           BPF_ASSERT_NE(-1, SetSyscall(pid, &regs, -1));
           SECCOMP_PT_RESULT(regs) = kExpectedReturnValue;
+#if defined(__riscv)
+          iov.iov_len = sizeof(regs);
+          BPF_ASSERT_NE(-1, ptrace(PTRACE_SETREGSET, pid,
+                                   reinterpret_cast<void*>(NT_PRSTATUS),
+                                   &iov));
+#else
           BPF_ASSERT_NE(-1, ptrace(PTRACE_SETREGS, pid, NULL, &regs));
+#endif
         }
         break;
 
@@ -2049,7 +2065,13 @@ SANDBOX_TEST(SandboxBPF, DISABLE_ON_TSAN(SeccompRetTrace)) {
         // Rewrite to exit(kExpectedReturnValue).
         BPF_ASSERT_NE(-1, SetSyscall(pid, &regs, __NR_exit));
         SECCOMP_PT_PARM1(regs) = kExpectedReturnValue;
+#if defined(__riscv)
+        iov.iov_len = sizeof(regs);
+        BPF_ASSERT_NE(-1, ptrace(PTRACE_SETREGSET, pid,
+                                 reinterpret_cast<void*>(NT_PRSTATUS), &iov));
+#else
         BPF_ASSERT_NE(-1, ptrace(PTRACE_SETREGS, pid, NULL, &regs));
+#endif
         break;
 
       default:

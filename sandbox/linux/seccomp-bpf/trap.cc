@@ -221,6 +221,18 @@ void Trap::SigSys(int nr, LinuxSigInfo* info, ucontext_t* ctx) {
                        SECCOMP_PARM6(ctx),
                        SECCOMP_PARM7(ctx),
                        SECCOMP_PARM8(ctx));
+#elif defined(__riscv)
+    // RISC-V supports up to seven arguments for syscall.
+    // However, seccomp bpf can filter only up to six arguments, so using seven
+    // arguments has sense only when using UnsafeTrap() handler.
+    rc = Syscall::Call(SECCOMP_SYSCALL(ctx),
+                       SECCOMP_PARM1(ctx),
+                       SECCOMP_PARM2(ctx),
+                       SECCOMP_PARM3(ctx),
+                       SECCOMP_PARM4(ctx),
+                       SECCOMP_PARM5(ctx),
+                       SECCOMP_PARM6(ctx),
+                       SECCOMP_PARM7(ctx));
 #else
     rc = Syscall::Call(SECCOMP_SYSCALL(ctx),
                        SECCOMP_PARM1(ctx),

@@ -26,7 +26,7 @@ ResultExpr ServiceProcessPolicy::EvaluateSyscall(int sysno) const {
       return RestrictIoctl();
       // Allow the system calls below.
 #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
-    defined(__aarch64__)
+    defined(__aarch64__) || defined(__riscv)
     case __NR_getrlimit:
 #endif
 #if defined(__i386__) || defined(__arm__)

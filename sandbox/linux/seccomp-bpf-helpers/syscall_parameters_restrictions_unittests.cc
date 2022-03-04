@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/elf.h>
+#include <asm/ptrace.h>
 #include <sched.h>
 #include <sys/prctl.h>
 #include <sys/ptrace.h>
