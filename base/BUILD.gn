@@ -2676,6 +2676,11 @@ buildflag_header("debugging_buildflags") {
   _enable_stack_trace_line_numbers =
       !print_unsymbolized_stack_traces && enable_stack_trace_line_numbers
 
+  # Fuchsia and Android do not relocate the strtab pointer on ELF load.
+  # On GNU Linux, when the dynamic section is readonly, the strtab pointer is also not
+  # relocated, which is the ABI behavior on RISC-V (See sysdeps/riscv/dl-relocate-ld.h).
+  should_relocate_elf_strtab = is_android || is_fuchsia || (is_linux && current_cpu == "riscv64")
+
   flags = [
     "DCHECK_IS_CONFIGURABLE=$dcheck_is_configurable",
     "ENABLE_PROFILING=$enable_profiling",
@@ -2691,6 +2696,7 @@ buildflag_header("debugging_buildflags") {
     "ENABLE_ALLOCATION_STACK_TRACE_RECORDER=$build_allocation_stack_trace_recorder",
     "ENABLE_ALLOCATION_TRACE_RECORDER_FULL_REPORTING=$build_allocation_trace_recorder_full_reporting",
     "PRINT_UNSYMBOLIZED_STACK_TRACES=$print_unsymbolized_stack_traces",
+    "SHOULD_RELOCATE_ELF_STRTAB=$should_relocate_elf_strtab",
   ]
 }
 

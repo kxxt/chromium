@@ -270,7 +270,7 @@ TestElfImage TestElfImageBuilder::Build() {
 
   Dyn strtab_dyn;
   strtab_dyn.d_tag = DT_STRTAB;
-#if BUILDFLAG(IS_FUCHSIA) || BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(SHOULD_RELOCATE_ELF_STRTAB)
   // Fuchsia and Android do not alter the symtab pointer on ELF load -- it's
   // expected to remain a 'virutal address'.
   strtab_dyn.d_un.d_ptr =
