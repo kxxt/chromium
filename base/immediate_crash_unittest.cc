@@ -106,6 +106,14 @@ constexpr Instruction kOptionalFooter[] = {};
 
 #endif  // defined(OFFICIAL_BUILD)
 
+#else  // Dummy declaration to make it compile on unofficial platforms
+
+using Instruction = uint32_t;
+constexpr Instruction kRet = 0;
+constexpr Instruction kRequiredBody[] = {};
+constexpr Instruction kOptionalFooter[] = {};
+#define SKIP_TEST_ON_UNOFFICIAL_PLATFORM
+
 #endif
 
 // This function loads a shared library that defines two functions,
@@ -222,6 +230,7 @@ std::vector<Instruction> MaybeSkipCoverageHook(
 
 }  // namespace
 
+#ifndef SKIP_TEST_ON_UNOFFICIAL_PLATFORM
 // Attempts to verify the actual instructions emitted by ImmediateCrash().
 // While the test results are highly implementation-specific, this allows macro
 // changes (e.g. CLs like https://crrev.com/671123) to be verified using the
@@ -258,5 +267,6 @@ TEST(ImmediateCrashTest, ExpectedOpcodeSequence) {
   ASSERT_TRUE(result);
 #endif  // defined(OFFICIAL_BUILD)
 }
+#endif  // SKIP_TEST_ON_UNOFFICIAL_PLATFORM
 
 }  // namespace base
